@@ -1,3 +1,4 @@
+# config/settings.py
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -24,7 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'catalog',  # Ваше приложение каталога
+    'catalog',
 ]
 
 MIDDLEWARE = [
@@ -57,24 +58,20 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'config.wsgi.application'
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.postgresql',
-#         'NAME': os.getenv('DB_NAME', 'skystore_db'),
-#         'USER': os.getenv('DB_USER', 'postgres'),
-#         'PASSWORD': os.getenv('DB_PASSWORD', ''),
-#         'HOST': os.getenv('DB_HOST', 'localhost'),
-#         'PORT': os.getenv('DB_PORT', '5432'),
-#     }
-# }
-
-
+# Database
+# ==============================================================================
+# PostgreSQL настройки (ЗАДАНИЕ 1 - ОБЯЗАТЕЛЬНО!)
+# ==============================================================================
 DATABASES = {
-     'default': {
-         'ENGINE': 'django.db.backends.sqlite3',
-         'NAME': BASE_DIR / 'db.sqlite3',
-     }
- }
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',  # Изменено с sqlite3 на postgresql
+        'NAME': os.getenv('DB_NAME', 'skystore_db'),
+        'USER': os.getenv('DB_USER', 'postgres'),
+        'PASSWORD': os.getenv('DB_PASSWORD', '120810'),
+        'HOST': os.getenv('DB_HOST', 'localhost'),
+        'PORT': os.getenv('DB_PORT', '5432'),
+    }
+}
 
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
@@ -104,29 +101,9 @@ STATICFILES_DIRS = [
     BASE_DIR / 'static',
 ]
 
-# Media files (ЗАДАНИЕ 6 - работа с медиаданными)
+# Media files
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
-
-# Настройки для режима DEBUG
-if DEBUG:
-    # Для отладки - показываем SQL запросы
-    LOGGING = {
-        'version': 1,
-        'disable_existing_loggers': False,
-        'handlers': {
-            'console': {
-                'level': 'DEBUG',
-                'class': 'logging.StreamHandler',
-            },
-        },
-        'loggers': {
-            'django.db.backends': {
-                'level': 'DEBUG',
-                'handlers': ['console'],
-            },
-        },
-    }
