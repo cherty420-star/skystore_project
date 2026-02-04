@@ -1,0 +1,158 @@
+[
+{
+  "model": "catalog.product",
+  "pk": 1,
+  "fields": {
+    "name": "Смартфон iPhone 15 Pro",
+    "description": "Флагманский смартфон Apple с процессором A17 Pro",
+    "image": "",
+    "category": 1,
+    "price": "99999.99",
+    "created_at": "2026-02-04T09:33:36.657Z",
+    "updated_at": "2026-02-04T09:33:36.657Z"
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 2,
+  "fields": {
+    "name": "Ноутбук Dell XPS 13",
+    "description": "Ультрабук с безрамочным дисплеем 13.4\"",
+    "image": "",
+    "category": 1,
+    "price": "129999.00",
+    "created_at": "2026-02-04T09:33:36.660Z",
+    "updated_at": "2026-02-04T09:33:36.660Z"
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 3,
+  "fields": {
+    "name": "Наушники Sony WH-1000XM5",
+    "description": "Беспроводные наушники с шумоподавлением",
+    "image": "",
+    "category": 1,
+    "price": "29999.99",
+    "created_at": "2026-02-04T09:33:36.697Z",
+    "updated_at": "2026-02-04T09:33:36.697Z"
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 4,
+  "fields": {
+    "name": "Футболка Nike Sportswear",
+    "description": "Хлопковая футболка с логотипом Nike",
+    "image": "",
+    "category": 2,
+    "price": "2499.99",
+    "created_at": "2026-02-04T09:33:36.699Z",
+    "updated_at": "2026-02-04T09:33:36.699Z"
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 5,
+  "fields": {
+    "name": "Джинсы Levis 501",
+    "description": "Классические джинсы прямого кроя",
+    "image": "",
+    "category": 2,
+    "price": "5999.99",
+    "created_at": "2026-02-04T09:33:36.701Z",
+    "updated_at": "2026-02-04T09:33:36.701Z"
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 6,
+  "fields": {
+    "name": "Курта The North Face",
+    "description": "Теплая зимняя куртка",
+    "image": "",
+    "category": 2,
+    "price": "14999.99",
+    "created_at": "2026-02-04T09:33:36.703Z",
+    "updated_at": "2026-02-04T09:33:36.703Z"
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 7,
+  "fields": {
+    "name": "Книга \"Гарри Поттер и философский камень\"",
+    "description": "Первая книга культовой серии",
+    "image": "",
+    "category": 3,
+    "price": "899.99",
+    "created_at": "2026-02-04T09:33:36.705Z",
+    "updated_at": "2026-02-04T09:33:36.705Z"
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 8,
+  "fields": {
+    "name": "Python. К вершинам мастерства",
+    "description": "Продвинутое руководство по Python",
+    "image": "",
+    "category": 3,
+    "price": "1899.99",
+    "created_at": "2026-02-04T09:33:36.735Z",
+    "updated_at": "2026-02-04T09:33:36.735Z"
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 9,
+  "fields": {
+    "name": "Футбольный мяч Adidas",
+    "description": "Официальный мяч для профессиональных матчей",
+    "image": "",
+    "category": 4,
+    "price": "2999.99",
+    "created_at": "2026-02-04T09:33:36.737Z",
+    "updated_at": "2026-02-04T09:33:36.737Z"
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 10,
+  "fields": {
+    "name": "Гантели наборные 20 кг",
+    "description": "Набор гантелей для домашних тренировок",
+    "image": "",
+    "category": 4,
+    "price": "3999.99",
+    "created_at": "2026-02-04T09:33:36.740Z",
+    "updated_at": "2026-02-04T09:33:36.740Z"
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 11,
+  "fields": {
+    "name": "Диван угловой \"Модерн\"",
+    "description": "Угловой диван с ортопедическим матрасом",
+    "image": "",
+    "category": 5,
+    "price": "45999.99",
+    "created_at": "2026-02-04T09:33:36.742Z",
+    "updated_at": "2026-02-04T09:33:36.742Z"
+  }
+},
+{
+  "model": "catalog.product",
+  "pk": 12,
+  "fields": {
+    "name": "Стол компьютерный",
+    "description": "Эргономичный стол для работы за компьютером",
+    "image": "",
+    "category": 5,
+    "price": "12999.99",
+    "created_at": "2026-02-04T09:33:36.744Z",
+    "updated_at": "2026-02-04T09:33:36.744Z"
+  }
+}
+]

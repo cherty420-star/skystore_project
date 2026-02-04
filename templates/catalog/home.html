@@ -1,81 +1,450 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Skystore</title>
-    <!-- Bootstrap CSS -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skystore - Главная</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.0/font/bootstrap-icons.css">
+    <style>
+        :root {
+            --primary-color: #0d6efd;
+            --secondary-color: #6c757d;
+            --success-color: #198754;
+            --danger-color: #dc3545;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+
+        .navbar-brand {
+            font-weight: 700;
+            color: var(--primary-color) !important;
+        }
+
+        .hero-section {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 4rem 0;
+            border-radius: 0 0 30px 30px;
+            margin-bottom: 3rem;
+        }
+
+        .product-card {
+            transition: all 0.3s ease;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            overflow: hidden;
+            height: 100%;
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            border-color: var(--primary-color);
+        }
+
+        .product-image-container {
+            height: 200px;
+            overflow: hidden;
+            background-color: #f8f9fa;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .product-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+
+        .product-card:hover .product-image {
+            transform: scale(1.05);
+        }
+
+        .product-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 1;
+        }
+
+        .category-badge {
+            font-size: 0.75rem;
+            padding: 3px 8px;
+            border-radius: 15px;
+        }
+
+        .price-tag {
+            font-size: 1.25rem;
+            font-weight: bold;
+            color: var(--success-color);
+        }
+
+        .product-meta {
+            font-size: 0.875rem;
+            color: var(--secondary-color);
+        }
+
+        .stats-card {
+            background: white;
+            border-radius: 10px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 1rem;
+        }
+
+        .stats-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state {
+            padding: 4rem 2rem;
+            text-align: center;
+            background: white;
+            border-radius: 10px;
+            border: 2px dashed #dee2e6;
+        }
+    </style>
 </head>
 <body>
-<div class="d-flex flex-column flex-md-row align-items-center p-3 px-md-4 mb-3 bg-white border-bottom box-shadow">
-    <h5 class="my-0 mr-md-auto font-weight-normal">Skystore</h5>
-    <nav class="ms-5">
-        <a class="p-2 btn btn-outline-primary" href="{% url 'home' %}">Каталог</a>
-        <a class="p-2 btn btn-outline-primary" href="{% url 'contacts' %}">Контакты</a>
+    <!-- Навигация -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+        <div class="container">
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <i class="bi bi-cloud-fill me-2"></i>
+                Skystore
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'home' %}">
+                            <i class="bi bi-house-door me-1"></i>
+                            Главная
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'contacts' %}">
+                            <i class="bi bi-telephone me-1"></i>
+                            Контакты
+                        </a>
+                    </li>
+                </ul>
+            </div>
+        </div>
     </nav>
-</div>
 
-<div class="pricing-header px-3 py-3 pt-md-5 pb-md-4 mx-auto text-center">
-    <h1 class="display-4">Skystore</h1>
-    <p class="lead">Skystore - это отличный вариант хранения ваших плагинов и примеров кода, который вы бы хотели
-        продать</p>
-</div>
-
-<div class="container">
-    <div class="row text-center">
-        <div class="col-3">
-            <div class="card mb-4 box-shadow">
-                <div class="card-header">
-                    <h4 class="my-0 font-weight-normal">Удобный сервис рассылок</h4>
+    <!-- Герой-секция -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8">
+                    <h1 class="display-4 fw-bold mb-3">Добро пожаловать в Skystore!</h1>
+                    <p class="lead mb-4">Лучший магазин цифровых товаров, плагинов и готовых решений для разработчиков.</p>
+                    <div class="d-flex flex-wrap gap-3">
+                        <span class="badge bg-light text-dark">
+                            <i class="bi bi-shield-check me-1"></i>
+                            Гарантия качества
+                        </span>
+                        <span class="badge bg-light text-dark">
+                            <i class="bi bi-lightning-charge me-1"></i>
+                            Мгновенная доставка
+                        </span>
+                        <span class="badge bg-light text-dark">
+                            <i class="bi bi-headset me-1"></i>
+                            Поддержка 24/7
+                        </span>
+                    </div>
                 </div>
-                <div class="card-body">
-                    <h1 class="card-title pricing-card-title">$ 140</h1>
-                    <ul class="list-unstyled mt-3 mb-4 text-start m-3">
-                        <li>- Неограниченная лицензия</li>
-                        <li>- Поддержка</li>
-                        <li>- Установка на сервер</li>
-                        <li>- Получение обновлений</li>
-                    </ul>
-                    <button type="button" class="btn btn-lg btn-block btn-outline-primary">Купить</button>
+                <div class="col-lg-4 text-center mt-4 mt-lg-0">
+                    <i class="bi bi-bag-heart-fill display-1"></i>
                 </div>
             </div>
         </div>
+    </section>
+
+    <div class="container">
+        <!-- Статистика -->
+        <div class="row mb-5">
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stats-number text-primary">
+                        {% if latest_products %}
+                            {{ latest_products|length }}
+                        {% else %}
+                            0
+                        {% endif %}
+                    </div>
+                    <h5>Новых товаров</h5>
+                    <p class="text-muted mb-0">Добавлено за последнее время</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stats-number text-success">
+                        {{ total_products|default:"0" }}
+                    </div>
+                    <h5>Всего товаров</h5>
+                    <p class="text-muted mb-0">В нашем каталоге</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="stats-card">
+                    <div class="stats-number text-warning">
+                        {{ total_categories|default:"0" }}
+                    </div>
+                    <h5>Категорий</h5>
+                    <p class="text-muted mb-0">Разнообразие выбора</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Блок с последними продуктами -->
+        <div class="row mb-5">
+            <div class="col-12">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2 class="mb-0">
+                        <i class="bi bi-star-fill text-warning me-2"></i>
+                        Последние добавленные товары
+                    </h2>
+                    <span class="badge bg-primary">
+                        {% if latest_products %}
+                            Показано: {{ latest_products|length }}
+                        {% else %}
+                            Нет товаров
+                        {% endif %}
+                    </span>
+                </div>
+
+                {% if latest_products %}
+                <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 row-cols-xl-4 g-4">
+                    {% for product in latest_products %}
+                    <div class="col">
+                        <div class="card product-card h-100">
+                            <!-- Бейдж нового товара -->
+                            <div class="product-badge">
+                                {% with days_since=product.created_at|timesince %}
+                                {% if "day" not in days_since or "hour" in days_since %}
+                                <span class="badge bg-danger">NEW</span>
+                                {% endif %}
+                                {% endwith %}
+                            </div>
+
+                            <!-- Изображение товара -->
+                            <div class="product-image-container">
+                                {% if product.image %}
+                                <img src="{{ product.image.url }}" class="product-image" alt="{{ product.name }}">
+                                {% else %}
+                                <div class="text-center p-4">
+                                    <i class="bi bi-image text-secondary" style="font-size: 3rem;"></i>
+                                    <p class="text-muted mt-2 mb-0">Нет изображения</p>
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="card-body d-flex flex-column">
+                                <!-- Категория -->
+                                <div class="mb-2">
+                                    <span class="badge bg-info category-badge">
+                                        {% if product.category %}
+                                            {{ product.category.name }}
+                                        {% else %}
+                                            Без категории
+                                        {% endif %}
+                                    </span>
+                                </div>
+
+                                <!-- Название товара -->
+                                <h5 class="card-title" title="{{ product.name }}">
+                                    {{ product.name|truncatechars:40 }}
+                                </h5>
+
+                                <!-- Описание товара -->
+                                <p class="card-text text-muted small flex-grow-1">
+                                    {% if product.description %}
+                                        {{ product.description|truncatechars:100 }}
+                                    {% else %}
+                                        <span class="text-muted fst-italic">Описание отсутствует</span>
+                                    {% endif %}
+                                </p>
+
+                                <!-- Цена и информация -->
+                                <div class="mt-auto">
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <span class="price-tag">
+                                            {{ product.price }} ₽
+                                        </span>
+                                        <span class="product-meta">
+                                            <i class="bi bi-calendar3 me-1"></i>
+                                            {{ product.created_at|date:"d.m.Y" }}
+                                        </span>
+                                    </div>
+
+                                    <!-- Кнопки действий -->
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-primary btn-sm">
+                                            <i class="bi bi-cart-plus me-1"></i>
+                                            В корзину
+                                        </button>
+                                        <button class="btn btn-outline-secondary btn-sm">
+                                            <i class="bi bi-info-circle me-1"></i>
+                                            Подробнее
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Футер карточки -->
+                            <div class="card-footer bg-transparent border-top-0 pt-0">
+                                <small class="text-muted d-flex justify-content-between">
+                                    <span>
+                                        <i class="bi bi-arrow-clockwise me-1"></i>
+                                        Обновлено: {{ product.updated_at|timesince }} назад
+                                    </span>
+                                    <span>
+                                        ID: {{ product.id }}
+                                    </span>
+                                </small>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <!-- Состояние при отсутствии товаров -->
+                <div class="empty-state">
+                    <i class="bi bi-emoji-frown display-1 text-muted mb-3"></i>
+                    <h3 class="mb-3">Товаров пока нет</h3>
+                    <p class="text-muted mb-4">Но скоро они появятся в нашем магазине!</p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="{% url 'contacts' %}" class="btn btn-primary">
+                            <i class="bi bi-telephone me-1"></i>
+                            Связаться с нами
+                        </a>
+                        <button class="btn btn-outline-secondary">
+                            <i class="bi bi-bell me-1"></i>
+                            Узнать о поступлении
+                        </button>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Информация для отладки (только в режиме разработки) -->
+        {% if debug %}
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card border-info">
+                    <div class="card-header bg-info text-white">
+                        <i class="bi bi-bug me-2"></i>
+                        Информация для разработки
+                    </div>
+                    <div class="card-body">
+                        <h5>Данные из базы:</h5>
+                        <pre class="bg-light p-3 rounded">
+Количество товаров: {{ latest_products|length }}
+Выборка: последние {{ latest_products|length }} товаров
+{% for product in latest_products %}
+- {{ product.name }} ({{ product.price }} руб.)
+{% endfor %}
+                        </pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
 
-    <footer class="pt-4 my-md-5 pt-md-5 border-top">
-        <div class="row">
-            <div class="col-12 col-md">
-                SkyStore
-                <small class="d-block mb-3 text-muted">&copy; {% now "Y" %}</small>
+    <!-- Футер -->
+    <footer class="bg-dark text-white py-5 mt-5">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4 mb-4">
+                    <h5 class="mb-3">
+                        <i class="bi bi-cloud-fill me-2"></i>
+                        Skystore
+                    </h5>
+                    <p class="text-muted">Лучший магазин цифровых товаров. Мы создаем технологии, которые меняют мир.</p>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h5 class="mb-3">Быстрые ссылки</h5>
+                    <ul class="list-unstyled">
+                        <li class="mb-2">
+                            <a href="{% url 'home' %}" class="text-white text-decoration-none">
+                                <i class="bi bi-arrow-right-short me-1"></i>
+                                Главная
+                            </a>
+                        </li>
+                        <li class="mb-2">
+                            <a href="{% url 'contacts' %}" class="text-white text-decoration-none">
+                                <i class="bi bi-arrow-right-short me-1"></i>
+                                Контакты
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+                <div class="col-md-4 mb-4">
+                    <h5 class="mb-3">Контакты</h5>
+                    <ul class="list-unstyled text-muted">
+                        <li class="mb-2">
+                            <i class="bi bi-envelope me-2"></i>
+                            info@skystore.ru
+                        </li>
+                        <li class="mb-2">
+                            <i class="bi bi-telephone me-2"></i>
+                            +7 (495) 123-45-67
+                        </li>
+                    </ul>
+                </div>
             </div>
-            <div class="col-6 col-md">
-                <h5>Категории</h5>
-                <ul class="list-unstyled text-small">
-                    <li><a class="text-muted" href="#">Рассылки</a></li>
-                    <li><a class="text-muted" href="#">Телеграм боты</a></li>
-                    <li><a class="text-muted" href="#">Полезные утилиты</a></li>
-                    <li><a class="text-muted" href="#">Веб-приложения</a></li>
-                    <li><a class="text-muted" href="#">Микросервисы</a></li>
-                </ul>
-            </div>
-            <div class="col-6 col-md">
-                <h5>Дополнительно</h5>
-                <ul class="list-unstyled text-small">
-                    <li><a class="text-muted" href="#">Мы пишем</a></li>
-                </ul>
-            </div>
-            <div class="col-6 col-md">
-                <h5>О нас</h5>
-                <ul class="list-unstyled text-small">
-                    <li><a class="text-muted" href="{% url 'contacts' %}">Контакты</a></li>
-                </ul>
+            <hr class="bg-secondary">
+            <div class="text-center pt-3">
+                <p class="mb-0 text-muted">
+                    &copy; {% now "Y" %} Skystore. Все права защищены.
+                    <span class="mx-2">|</span>
+                    <a href="#" class="text-muted text-decoration-none">Политика конфиденциальности</a>
+                </p>
             </div>
         </div>
     </footer>
-</div>
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Анимация при наведении на карточки товаров
+        document.addEventListener('DOMContentLoaded', function() {
+            const productCards = document.querySelectorAll('.product-card');
+
+            productCards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = 'translateY(-10px)';
+                    this.style.boxShadow = '0 15px 30px rgba(0,0,0,0.15)';
+                });
+
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = 'translateY(0)';
+                    this.style.boxShadow = '0 5px 15px rgba(0,0,0,0.1)';
+                });
+            });
+
+            // Вывод информации в консоль для отладки
+            console.log('=== SKYSTORE PRODUCTS INFO ===');
+            console.log('Total products shown: {{ latest_products|length }}');
+            {% for product in latest_products %}
+            console.log('Product {{ forloop.counter }}: {{ product.name|escapejs }} - {{ product.price }} руб.');
+            {% endfor %}
+            console.log('============================');
+        });
+    </script>
 </body>
 </html>
