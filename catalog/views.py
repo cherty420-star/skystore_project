@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from .forms import ContactForm
 from .models import Product, Category, ContactMessage
@@ -8,21 +8,21 @@ from django.utils import timezone
 def home(request):
     """Контроллер для домашней страницы"""
     # Получаем последние 5 продуктов
-    latest_products = Product.objects.select_related('category').order_by('-created_at')[:5]
+    products = Product.objects.select_related('category').order_by('-created_at')[:5]
 
     # Выводим в консоль (для дополнительного задания)
     print("\n" + "=" * 60)
     print("ПОСЛЕДНИЕ 5 СОЗДАННЫХ ПРОДУКТОВ:")
     print("=" * 60)
 
-    if latest_products.exists():
-        for idx, product in enumerate(latest_products, 1):
+    if products.exists():
+        for idx, product in enumerate(products, 1):
             category_name = product.category.name if product.category else 'Без категории'
             print(f"{idx}. {product.name} - {product.price} руб. ({category_name})")
     else:
         print("Товаров пока нет в базе данных")
 
-    print(f"Всего показано товаров: {len(latest_products)}")
+    print(f"Всего показано товаров: {len(products)}")
     print("=" * 60)
 
     # Получаем статистику
@@ -30,7 +30,7 @@ def home(request):
     total_categories = Category.objects.count()
 
     context = {
-        'latest_products': latest_products,
+        'products': products,  # Переименовал с latest_products на products
         'total_products': total_products,
         'total_categories': total_categories,
     }
@@ -38,9 +38,19 @@ def home(request):
     return render(request, 'catalog/home.html', context)
 
 
+def product_detail(request, pk):
+    """Контроллер для страницы товара"""
+    product = get_object_or_404(
+        Product.objects.select_related('category'),
+        pk=pk
+    )
+
+    return render(request, 'catalog/product_detail.html', {'product': product})
+
+
 def contacts(request):
     """Контроллер для страницы контактов"""
-    # Получаем контактные сообщения из базы данных
+    # Получаем необработанные сообщения
     contact_messages = ContactMessage.objects.filter(is_processed=False).order_by('-created_at')[:10]
 
     # Статистика
@@ -51,7 +61,6 @@ def contacts(request):
         is_processed=False
     ).count()
 
-    # Инициализируем форму
     form = ContactForm()
 
     if request.method == 'POST':
@@ -66,9 +75,6 @@ def contacts(request):
                 is_processed=False
             )
 
-            # Выводим информацию в консоль
-            print(f"\n✅ Новое сообщение сохранено в БД: {contact_message.name}")
-
             messages.success(request, f'Спасибо, {contact_message.name}! Ваше сообщение отправлено.')
             return redirect('contacts')
 
@@ -81,13 +87,3 @@ def contacts(request):
     }
 
     return render(request, 'catalog/contacts.html', context)
-
-
-# Дополнительные функции для других маршрутов (если нужно)
-def about(request):
-    return render(request, 'catalog/about.html', {'title': 'О нас'})
-
-
-def product_list(request):
-    products = Product.objects.all()
-    return render(request, 'catalog/product_list.html', {'products': products})

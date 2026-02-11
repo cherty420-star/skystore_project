@@ -1,4 +1,3 @@
-# catalog/models.py - добавьте в конец файла после модели Product
 from django.db import models
 from django.core.validators import MinValueValidator
 from django.utils import timezone
