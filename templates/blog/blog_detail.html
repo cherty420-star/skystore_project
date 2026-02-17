@@ -1,0 +1,108 @@
+{% extends 'catalog/base.html' %}
+{% load static %}
+
+{% block title %}{{ post.title }} - Блог Skystore{% endblock %}
+
+{% block extra_css %}
+<style>
+    .blog-detail {
+        max-width: 800px;
+        margin: 3rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    }
+
+    .blog-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 1rem;
+    }
+
+    .blog-meta {
+        padding: 1rem 0;
+        margin-bottom: 2rem;
+        border-bottom: 1px solid #e9ecef;
+        color: #6c757d;
+    }
+
+    .blog-content {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: #444;
+    }
+
+    .blog-image {
+        max-width: 100%;
+        max-height: 400px;
+        object-fit: contain;
+        margin: 2rem 0;
+        border-radius: 10px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <nav aria-label="breadcrumb" class="mt-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'catalog:home' %}" class="text-decoration-none">
+                    <i class="bi bi-house-door me-1"></i>
+                    Главная
+                </a>
+            </li>
+            <li class="breadcrumb-item">
+                <a href="{% url 'blog:blog_list' %}" class="text-decoration-none">
+                    Блог
+                </a>
+            </li>
+            <li class="breadcrumb-item active">{{ post.title|truncatechars:50 }}</li>
+        </ol>
+    </nav>
+
+    <div class="blog-detail">
+        <h1 class="blog-title">{{ post.title }}</h1>
+
+        <div class="blog-meta d-flex justify-content-between">
+            <span>
+                <i class="bi bi-calendar3 me-2"></i>
+                {{ post.created_at|date:"d.m.Y H:i" }}
+            </span>
+            <span>
+                <i class="bi bi-eye me-2"></i>
+                Просмотров: {{ post.views_count }}
+            </span>
+        </div>
+
+        {% if post.preview %}
+        <div class="text-center">
+            <img src="{{ post.preview.url }}" class="blog-image" alt="{{ post.title }}">
+        </div>
+        {% endif %}
+
+        <div class="blog-content">
+            {{ post.content|linebreaks }}
+        </div>
+
+        <div class="mt-5 d-flex justify-content-between">
+            <a href="{% url 'blog:blog_list' %}" class="btn btn-outline-secondary">
+                <i class="bi bi-arrow-left me-2"></i>
+                К списку статей
+            </a>
+            <div>
+                <a href="{% url 'blog:post_update' post.pk %}" class="btn btn-outline-primary">
+                    <i class="bi bi-pencil me-2"></i>
+                    Редактировать
+                </a>
+                <a href="{% url 'blog:post_delete' post.pk %}" class="btn btn-outline-danger">
+                    <i class="bi bi-trash me-2"></i>
+                    Удалить
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

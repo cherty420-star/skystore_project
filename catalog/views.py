@@ -1,69 +1,80 @@
-from django.shortcuts import render, redirect, get_object_or_404
+from django.views.generic import ListView, DetailView, TemplateView, CreateView, UpdateView, DeleteView
+from django.urls import reverse_lazy
 from django.contrib import messages
-from .forms import ContactForm
-from .models import Product, Category, ContactMessage
+from django.shortcuts import redirect
 from django.utils import timezone
+from .models import Product, Category, ContactMessage
+from .forms import ContactForm
 
 
-def home(request):
-    """Контроллер для домашней страницы"""
-    # Получаем последние 5 продуктов
-    products = Product.objects.select_related('category').order_by('-created_at')[:5]
+class HomeListView(ListView):
+    """Контроллер для главной страницы"""
+    model = Product
+    template_name = 'catalog/home.html'
+    context_object_name = 'products'
 
-    # Выводим в консоль (для дополнительного задания)
-    print("\n" + "=" * 60)
-    print("ПОСЛЕДНИЕ 5 СОЗДАННЫХ ПРОДУКТОВ:")
-    print("=" * 60)
+    def get_queryset(self):
+        """Получаем последние 5 продуктов"""
+        return Product.objects.select_related('category').order_by('-created_at')[:5]
 
-    if products.exists():
-        for idx, product in enumerate(products, 1):
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        # Добавляем статистику
+        context['total_products'] = Product.objects.count()
+        context['total_categories'] = Category.objects.count()
+
+        # Выводим в консоль (для отладки)
+        print("\n" + "=" * 60)
+        print("ПОСЛЕДНИЕ 5 СОЗДАННЫХ ПРОДУКТОВ:")
+        print("=" * 60)
+        for product in context['products']:
             category_name = product.category.name if product.category else 'Без категории'
-            print(f"{idx}. {product.name} - {product.price} руб. ({category_name})")
-    else:
-        print("Товаров пока нет в базе данных")
+            print(f"- {product.name} - {product.price} руб. ({category_name})")
+        print("=" * 60)
 
-    print(f"Всего показано товаров: {len(products)}")
-    print("=" * 60)
-
-    # Получаем статистику
-    total_products = Product.objects.count()
-    total_categories = Category.objects.count()
-
-    context = {
-        'products': products,  # Переименовал с latest_products на products
-        'total_products': total_products,
-        'total_categories': total_categories,
-    }
-
-    return render(request, 'catalog/home.html', context)
+        return context
 
 
-def product_detail(request, pk):
+class ProductDetailView(DetailView):
     """Контроллер для страницы товара"""
-    product = get_object_or_404(
-        Product.objects.select_related('category'),
-        pk=pk
-    )
+    model = Product
+    template_name = 'catalog/product_detail.html'
+    context_object_name = 'product'
 
-    return render(request, 'catalog/product_detail.html', {'product': product})
+    def get_queryset(self):
+        """Оптимизируем запрос с select_related"""
+        return Product.objects.select_related('category')
 
 
-def contacts(request):
+class ContactsView(TemplateView):
     """Контроллер для страницы контактов"""
-    # Получаем необработанные сообщения
-    contact_messages = ContactMessage.objects.filter(is_processed=False).order_by('-created_at')[:10]
+    template_name = 'catalog/contacts.html'
 
-    # Статистика
-    total_messages = ContactMessage.objects.count()
-    unprocessed_messages = ContactMessage.objects.filter(is_processed=False).count()
-    urgent_messages = ContactMessage.objects.filter(
-        created_at__gte=timezone.now() - timezone.timedelta(days=1),
-        is_processed=False
-    ).count()
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
 
-    form = ContactForm()
+        # Получаем необработанные сообщения
+        context['contact_messages'] = ContactMessage.objects.filter(
+            is_processed=False
+        ).order_by('-created_at')[:10]
 
-    if request.method == 'POST':
+        # Статистика
+        context['total_messages'] = ContactMessage.objects.count()
+        context['unprocessed_messages'] = ContactMessage.objects.filter(
+            is_processed=False
+        ).count()
+        context['urgent_messages'] = ContactMessage.objects.filter(
+            created_at__gte=timezone.now() - timezone.timedelta(days=1),
+            is_processed=False
+        ).count()
+
+        # Форма
+        context['form'] = ContactForm()
+
+        return context
+
+    def post(self, request, *args, **kwargs):
+        """Обработка POST запроса"""
         form = ContactForm(request.POST)
         if form.is_valid():
             # Сохраняем в базу данных
@@ -78,12 +89,7 @@ def contacts(request):
             messages.success(request, f'Спасибо, {contact_message.name}! Ваше сообщение отправлено.')
             return redirect('contacts')
 
-    context = {
-        'form': form,
-        'contact_messages': contact_messages,
-        'total_messages': total_messages,
-        'unprocessed_messages': unprocessed_messages,
-        'urgent_messages': urgent_messages,
-    }
-
-    return render(request, 'catalog/contacts.html', context)
+        # Если форма невалидна, возвращаем страницу с ошибками
+        context = self.get_context_data()
+        context['form'] = form
+        return self.render_to_response(context)
