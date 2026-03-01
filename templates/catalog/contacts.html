@@ -126,7 +126,7 @@
                 <div class="card-body p-4">
                     <h3 class="mb-4">Форма обратной связи</h3>
 
-                    <form method="post" action="{% url 'contacts' %}">
+                    <form method="post" action="{% url 'catalog:contacts' %}">
                         {% csrf_token %}
                         
                         {% for field in form %}

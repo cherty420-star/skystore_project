@@ -16,13 +16,51 @@ FORBIDDEN_WORDS = [
 ]
 
 
+class ContactForm(forms.Form):
+    """Форма обратной связи"""
+    name = forms.CharField(
+        max_length=100,
+        label='Имя',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'Ваше имя'
+        })
+    )
+
+    phone = forms.CharField(
+        max_length=20,
+        label='Телефон',
+        widget=forms.TextInput(attrs={
+            'class': 'form-control',
+            'placeholder': '+7 (900) 123-45-67'
+        })
+    )
+
+    email = forms.EmailField(
+        required=False,
+        label='Email',
+        widget=forms.EmailInput(attrs={
+            'class': 'form-control',
+            'placeholder': 'email@example.com'
+        })
+    )
+
+    message = forms.CharField(
+        label='Сообщение',
+        widget=forms.Textarea(attrs={
+            'class': 'form-control',
+            'placeholder': 'Опишите ваш вопрос или проблему...',
+            'rows': 5
+        })
+    )
+
+
 class ProductForm(forms.ModelForm):
     """Форма для создания и редактирования продуктов"""
 
     class Meta:
         model = Product
         fields = ['name', 'description', 'image', 'category', 'price']
-        # Убираем widgets отсюда, будем стилизовать через __init__
 
     def __init__(self, *args, **kwargs):
         """Стилизация формы через __init__"""
@@ -30,10 +68,7 @@ class ProductForm(forms.ModelForm):
 
         # Стилизация всех полей
         for field_name, field in self.fields.items():
-            if field_name == 'is_published' or field_name == 'checkbox':
-                # Для булевых полей используем специальный класс
-                field.widget.attrs['class'] = 'form-check-input'
-            elif isinstance(field.widget, forms.CheckboxInput):
+            if isinstance(field.widget, forms.CheckboxInput):
                 field.widget.attrs['class'] = 'form-check-input'
             elif isinstance(field.widget, forms.Select):
                 field.widget.attrs['class'] = 'form-select'
