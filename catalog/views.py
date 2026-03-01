@@ -4,7 +4,7 @@ from django.contrib import messages
 from django.shortcuts import redirect
 from django.utils import timezone
 from .models import Product, Category, ContactMessage
-from .forms import ContactForm
+from .forms import ContactForm, ProductForm
 
 
 class HomeListView(ListView):
@@ -44,6 +44,58 @@ class ProductDetailView(DetailView):
     def get_queryset(self):
         """Оптимизируем запрос с select_related"""
         return Product.objects.select_related('category')
+
+
+class ProductCreateView(CreateView):
+    """Контроллер для создания продукта"""
+    model = Product
+    form_class = ProductForm
+    template_name = 'catalog/product_form.html'
+    success_url = reverse_lazy('catalog:home')
+
+    def form_valid(self, form):
+        messages.success(self.request, '✅ Товар успешно создан!')
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        messages.error(self.request, '❌ Исправьте ошибки в форме')
+        return super().form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = 'Добавление нового товара'
+        return context
+
+
+class ProductUpdateView(UpdateView):
+    """Контроллер для редактирования продукта"""
+    model = Product
+    form_class = ProductForm
+    template_name = 'catalog/product_form.html'
+
+    def get_success_url(self):
+        messages.success(self.request, '✅ Товар успешно обновлен!')
+        return reverse_lazy('catalog:product_detail', kwargs={'pk': self.object.pk})
+
+    def form_invalid(self, form):
+        messages.error(self.request, '❌ Исправьте ошибки в форме')
+        return super().form_invalid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['title'] = f'Редактирование: {self.object.name}'
+        return context
+
+
+class ProductDeleteView(DeleteView):
+    """Контроллер для удаления продукта"""
+    model = Product
+    template_name = 'catalog/product_confirm_delete.html'
+    success_url = reverse_lazy('catalog:home')
+
+    def delete(self, request, *args, **kwargs):
+        messages.success(request, '✅ Товар успешно удален!')
+        return super().delete(request, *args, **kwargs)
 
 
 class ContactsView(TemplateView):
@@ -86,8 +138,8 @@ class ContactsView(TemplateView):
                 is_processed=False
             )
 
-            messages.success(request, f'Спасибо, {contact_message.name}! Ваше сообщение отправлено.')
-            return redirect('contacts')
+            messages.success(request, f'✅ Спасибо, {contact_message.name}! Ваше сообщение отправлено.')
+            return redirect('catalog:contacts')
 
         # Если форма невалидна, возвращаем страницу с ошибками
         context = self.get_context_data()

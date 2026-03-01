@@ -74,9 +74,43 @@
         background: #f8f9fa;
     }
 
+    .specs-value {
+        color: #212529;
+    }
+
     .back-button {
         margin-top: 2rem;
         text-align: center;
+    }
+
+    .action-buttons {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .btn-edit {
+        background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+        border: none;
+        color: #212529;
+    }
+
+    .btn-edit:hover {
+        background: linear-gradient(135deg, #ffb300 0%, #ffa000 100%);
+        color: #212529;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);
+    }
+
+    .btn-delete {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        border: none;
+    }
+
+    .btn-delete:hover {
+        background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
     }
 </style>
 {% endblock %}
@@ -87,14 +121,14 @@
     <nav aria-label="breadcrumb" class="mb-4">
         <ol class="breadcrumb">
             <li class="breadcrumb-item">
-                <a href="{% url 'home' %}" class="text-decoration-none">
+                <a href="{% url 'catalog:home' %}" class="text-decoration-none">
                     <i class="bi bi-house-door me-1"></i>
                     Главная
                 </a>
             </li>
             {% if product.category %}
             <li class="breadcrumb-item">
-                <a href="{% url 'home' %}" class="text-decoration-none">
+                <a href="{% url 'catalog:home' %}" class="text-decoration-none">
                     {{ product.category.name }}
                 </a>
             </li>
@@ -146,6 +180,32 @@
                 <!-- Название товара -->
                 <h1 class="product-title">{{ product.name }}</h1>
 
+                <!-- Краткая информация -->
+                <div class="row mt-4">
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
+                                <i class="bi bi-box-seam text-primary"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">Артикул</small>
+                                <strong>SKY-{{ product.id|stringformat:"04d" }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
+                                <i class="bi bi-calendar text-primary"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">Дата добавления</small>
+                                <strong>{{ product.created_at|date:"d.m.Y" }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Цена -->
                 <div class="product-price-large">
                     {{ product.price }} ₽
@@ -167,8 +227,26 @@
                 </div>
                 {% endif %}
 
+                <!-- Кнопки действий для редактирования и удаления -->
+                <div class="action-buttons">
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <a href="{% url 'catalog:product_update' product.pk %}" class="btn btn-edit w-100">
+                                <i class="bi bi-pencil me-2"></i>
+                                Редактировать
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <a href="{% url 'catalog:product_delete' product.pk %}" class="btn btn-delete w-100">
+                                <i class="bi bi-trash me-2"></i>
+                                Удалить
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Кнопка добавления в корзину -->
-                <div class="mt-4">
+                <div class="mt-3">
                     <button class="btn btn-success btn-lg w-100">
                         <i class="bi bi-cart-plus me-2"></i>
                         Добавить в корзину
@@ -199,6 +277,9 @@
                             <td class="specs-value">
                                 {% if product.category %}
                                     {{ product.category.name }}
+                                    {% if product.category.description %}
+                                    <small class="text-muted d-block">{{ product.category.description }}</small>
+                                    {% endif %}
                                 {% else %}
                                     Без категории
                                 {% endif %}
@@ -224,10 +305,22 @@
 
     <!-- Кнопка возврата -->
     <div class="back-button">
-        <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg">
+        <a href="{% url 'catalog:home' %}" class="btn btn-outline-secondary btn-lg">
             <i class="bi bi-arrow-left me-2"></i>
             Вернуться к списку товаров
         </a>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Активация тултипов Bootstrap
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
 {% endblock %}

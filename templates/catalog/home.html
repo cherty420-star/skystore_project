@@ -34,6 +34,14 @@
 </section>
 
 <div class="container">
+    <!-- Кнопка добавления товара -->
+    <div class="d-flex justify-content-end mb-4">
+        <a href="{% url 'catalog:product_create' %}" class="btn btn-primary">
+            <i class="bi bi-plus-circle me-2"></i>
+            Добавить товар
+        </a>
+    </div>
+
     <!-- Статистика -->
     <div class="row mb-5">
         <div class="col-md-4">
@@ -118,7 +126,7 @@
 
                             <!-- Название товара (ссылка на страницу товара) -->
                             <h5 class="card-title" title="{{ product.name }}">
-                                <a href="{% url 'product_detail' product.pk %}" class="text-decoration-none text-dark">
+                                <a href="{% url 'catalog:product_detail' product.pk %}" class="text-decoration-none text-dark">
                                     {{ product.name|truncatechars:40 }}
                                 </a>
                             </h5>
@@ -144,12 +152,20 @@
                                     </span>
                                 </div>
 
-                                <!-- Кнопка подробнее -->
+                                <!-- Кнопки действий -->
                                 <div class="d-grid gap-2">
-                                    <a href="{% url 'product_detail' product.pk %}" class="btn btn-primary btn-sm">
+                                    <a href="{% url 'catalog:product_detail' product.pk %}" class="btn btn-primary btn-sm">
                                         <i class="bi bi-info-circle me-1"></i>
                                         Подробнее
                                     </a>
+                                    <div class="btn-group">
+                                        <a href="{% url 'catalog:product_update' product.pk %}" class="btn btn-outline-warning btn-sm">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a href="{% url 'catalog:product_delete' product.pk %}" class="btn btn-outline-danger btn-sm">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -162,9 +178,13 @@
             <div class="empty-state">
                 <i class="bi bi-emoji-frown display-1 text-muted mb-3"></i>
                 <h3 class="mb-3">Товаров пока нет</h3>
-                <p class="text-muted mb-4">Но скоро они появятся в нашем магазине!</p>
+                <p class="text-muted mb-4">Но вы можете стать первым, кто добавит товар!</p>
                 <div class="d-flex justify-content-center gap-3">
-                    <a href="{% url 'contacts' %}" class="btn btn-primary">
+                    <a href="{% url 'catalog:product_create' %}" class="btn btn-primary">
+                        <i class="bi bi-plus-circle me-1"></i>
+                        Добавить товар
+                    </a>
+                    <a href="{% url 'catalog:contacts' %}" class="btn btn-outline-secondary">
                         <i class="bi bi-telephone me-1"></i>
                         Связаться с нами
                     </a>
@@ -174,4 +194,23 @@
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Анимация при наведении на карточки товаров
+    document.addEventListener('DOMContentLoaded', function() {
+        const productCards = document.querySelectorAll('.product-card');
+        productCards.forEach(card => {
+            card.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateY(-10px)';
+                this.style.boxShadow = '0 15px 30px rgba(0,0,0,0.15)';
+            });
+            card.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateY(0)';
+                this.style.boxShadow = '0 5px 15px rgba(0,0,0,0.1)';
+            });
+        });
+    });
+</script>
 {% endblock %}
