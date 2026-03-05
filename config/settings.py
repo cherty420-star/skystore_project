@@ -2,16 +2,12 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Загружаем переменные окружения
 load_dotenv()
 
-# Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-z92dcqa$w#7*41-yqj%emiib*#$yyzrbgod@w3&23_phqmi7dm')
 
-# SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = []
@@ -25,7 +21,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'catalog',
-    'blog',  # Новое приложение
+    'blog',
+    'users',  # Добавляем новое приложение
 ]
 
 MIDDLEWARE = [
@@ -59,12 +56,9 @@ TEMPLATES = [
 WSGI_APPLICATION = 'config.wsgi.application'
 
 # Database
-# ==============================================================================
-# PostgreSQL настройки (ЗАДАНИЕ 1 - ОБЯЗАТЕЛЬНО!)
-# ==============================================================================
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.postgresql',  # Изменено с sqlite3 на postgresql
+        'ENGINE': 'django.db.backends.postgresql',
         'NAME': os.getenv('DB_NAME', 'skystore_db'),
         'USER': os.getenv('DB_USER', 'postgres'),
         'PASSWORD': os.getenv('DB_PASSWORD', '120810'),
@@ -95,7 +89,7 @@ TIME_ZONE = 'Europe/Moscow'
 USE_I18N = True
 USE_TZ = True
 
-# Static files (CSS, JavaScript, Images)
+# Static files
 STATIC_URL = 'static/'
 STATICFILES_DIRS = [
     BASE_DIR / 'static',
@@ -107,3 +101,20 @@ MEDIA_ROOT = BASE_DIR / 'media'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# Custom user model
+AUTH_USER_MODEL = 'users.User'  # Указываем кастомную модель пользователя
+
+# Email settings (для отправки писем)
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Для разработки - вывод в консоль
+# Для продакшена нужно будет настроить реальный email
+# EMAIL_HOST = 'smtp.gmail.com'
+# EMAIL_PORT = 587
+# EMAIL_USE_TLS = True
+# EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
+# EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+
+# Login/Logout redirects
+LOGIN_URL = 'users:login'
+LOGIN_REDIRECT_URL = 'catalog:home'
+LOGOUT_REDIRECT_URL = 'catalog:home'
