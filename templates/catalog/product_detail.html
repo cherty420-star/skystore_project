@@ -1,0 +1,326 @@
+{% extends 'catalog/base.html' %}
+{% load static %}
+
+{% block title %}{{ product.name }} - Skystore{% endblock %}
+
+{% block extra_css %}
+<style>
+    .product-detail-wrapper {
+        padding: 3rem 0;
+    }
+
+    .product-detail-image {
+        max-height: 400px;
+        object-fit: contain;
+        border-radius: 10px;
+    }
+
+    .product-info-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+        height: 100%;
+    }
+
+    .product-title {
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        color: #333;
+    }
+
+    .product-price-large {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--success-color);
+        margin: 1.5rem 0;
+    }
+
+    .product-description {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: #666;
+        margin: 2rem 0;
+        padding: 1.5rem;
+        background: #f8f9fa;
+        border-radius: 10px;
+        border-left: 4px solid var(--primary-color);
+    }
+
+    .specs-table {
+        width: 100%;
+        background: white;
+        border-radius: 10px;
+        overflow: hidden;
+    }
+
+    .specs-table tr {
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .specs-table tr:last-child {
+        border-bottom: none;
+    }
+
+    .specs-table td {
+        padding: 1rem;
+    }
+
+    .specs-label {
+        font-weight: 600;
+        color: #495057;
+        width: 40%;
+        background: #f8f9fa;
+    }
+
+    .specs-value {
+        color: #212529;
+    }
+
+    .back-button {
+        margin-top: 2rem;
+        text-align: center;
+    }
+
+    .action-buttons {
+        margin-top: 2rem;
+        padding-top: 2rem;
+        border-top: 1px solid #e9ecef;
+    }
+
+    .btn-edit {
+        background: linear-gradient(135deg, #ffc107 0%, #ffb300 100%);
+        border: none;
+        color: #212529;
+    }
+
+    .btn-edit:hover {
+        background: linear-gradient(135deg, #ffb300 0%, #ffa000 100%);
+        color: #212529;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(255, 193, 7, 0.3);
+    }
+
+    .btn-delete {
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%);
+        border: none;
+    }
+
+    .btn-delete:hover {
+        background: linear-gradient(135deg, #c82333 0%, #bd2130 100%);
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(220, 53, 69, 0.3);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container product-detail-wrapper">
+    <!-- Хлебные крошки -->
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'catalog:home' %}" class="text-decoration-none">
+                    <i class="bi bi-house-door me-1"></i>
+                    Главная
+                </a>
+            </li>
+            {% if product.category %}
+            <li class="breadcrumb-item">
+                <a href="{% url 'catalog:home' %}" class="text-decoration-none">
+                    {{ product.category.name }}
+                </a>
+            </li>
+            {% endif %}
+            <li class="breadcrumb-item active" aria-current="page">{{ product.name|truncatechars:50 }}</li>
+        </ol>
+    </nav>
+
+    <div class="row">
+        <!-- Колонка с изображением -->
+        <div class="col-lg-6 mb-4">
+            <div class="product-info-card d-flex align-items-center justify-content-center">
+                {% if product.image %}
+                <img src="{{ product.image.url }}" class="img-fluid product-detail-image" alt="{{ product.name }}">
+                {% else %}
+                <div class="text-center p-5">
+                    <i class="bi bi-image text-secondary" style="font-size: 8rem;"></i>
+                    <h4 class="text-muted mt-4">Изображение отсутствует</h4>
+                    <p class="text-muted">Для данного товара не загружено изображение</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Колонка с информацией -->
+        <div class="col-lg-6 mb-4">
+            <div class="product-info-card">
+                <!-- Категория и статус -->
+                <div class="d-flex justify-content-between align-items-start mb-3">
+                    <span class="badge bg-info" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
+                        <i class="bi bi-tag me-1"></i>
+                        {% if product.category %}
+                            {{ product.category.name }}
+                        {% else %}
+                            Без категории
+                        {% endif %}
+                    </span>
+
+                    {% with days_since=product.created_at|timesince %}
+                    {% if "day" not in days_since or "hour" in days_since or "minute" in days_since %}
+                    <span class="badge bg-danger" style="font-size: 0.9rem; padding: 0.5rem 1rem;">
+                        <i class="bi bi-star-fill me-1"></i>
+                        Новинка!
+                    </span>
+                    {% endif %}
+                    {% endwith %}
+                </div>
+
+                <!-- Название товара -->
+                <h1 class="product-title">{{ product.name }}</h1>
+
+                <!-- Краткая информация -->
+                <div class="row mt-4">
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
+                                <i class="bi bi-box-seam text-primary"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">Артикул</small>
+                                <strong>SKY-{{ product.id|stringformat:"04d" }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-6">
+                        <div class="d-flex align-items-center mb-3">
+                            <div class="bg-primary bg-opacity-10 p-3 rounded-circle me-3">
+                                <i class="bi bi-calendar text-primary"></i>
+                            </div>
+                            <div>
+                                <small class="text-muted d-block">Дата добавления</small>
+                                <strong>{{ product.created_at|date:"d.m.Y" }}</strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Цена -->
+                <div class="product-price-large">
+                    {{ product.price }} ₽
+                </div>
+
+                <!-- Описание -->
+                {% if product.description %}
+                <div class="product-description">
+                    <h5 class="mb-3">
+                        <i class="bi bi-info-circle me-2"></i>
+                        Описание товара
+                    </h5>
+                    <p class="mb-0">{{ product.description|linebreaksbr }}</p>
+                </div>
+                {% else %}
+                <div class="alert alert-secondary mt-3">
+                    <i class="bi bi-exclamation-circle me-2"></i>
+                    Описание товара отсутствует
+                </div>
+                {% endif %}
+
+                <!-- Кнопки действий для редактирования и удаления -->
+                <div class="action-buttons">
+                    <div class="row">
+                        <div class="col-md-6 mb-2">
+                            <a href="{% url 'catalog:product_update' product.pk %}" class="btn btn-edit w-100">
+                                <i class="bi bi-pencil me-2"></i>
+                                Редактировать
+                            </a>
+                        </div>
+                        <div class="col-md-6 mb-2">
+                            <a href="{% url 'catalog:product_delete' product.pk %}" class="btn btn-delete w-100">
+                                <i class="bi bi-trash me-2"></i>
+                                Удалить
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Кнопка добавления в корзину -->
+                <div class="mt-3">
+                    <button class="btn btn-success btn-lg w-100">
+                        <i class="bi bi-cart-plus me-2"></i>
+                        Добавить в корзину
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Детальная информация -->
+    <div class="row mt-4">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-gear me-2"></i>
+                        Характеристики товара
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <table class="specs-table">
+                        <tr>
+                            <td class="specs-label">ID товара</td>
+                            <td class="specs-value">{{ product.id }}</td>
+                        </tr>
+                        <tr>
+                            <td class="specs-label">Категория</td>
+                            <td class="specs-value">
+                                {% if product.category %}
+                                    {{ product.category.name }}
+                                    {% if product.category.description %}
+                                    <small class="text-muted d-block">{{ product.category.description }}</small>
+                                    {% endif %}
+                                {% else %}
+                                    Без категории
+                                {% endif %}
+                            </td>
+                        </tr>
+                        <tr>
+                            <td class="specs-label">Цена</td>
+                            <td class="specs-value"><strong>{{ product.price }} ₽</strong></td>
+                        </tr>
+                        <tr>
+                            <td class="specs-label">Дата создания</td>
+                            <td class="specs-value">{{ product.created_at|date:"d.m.Y H:i" }}</td>
+                        </tr>
+                        <tr>
+                            <td class="specs-label">Последнее обновление</td>
+                            <td class="specs-value">{{ product.updated_at|date:"d.m.Y H:i" }}</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Кнопка возврата -->
+    <div class="back-button">
+        <a href="{% url 'catalog:home' %}" class="btn btn-outline-secondary btn-lg">
+            <i class="bi bi-arrow-left me-2"></i>
+            Вернуться к списку товаров
+        </a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Активация тултипов Bootstrap
+    document.addEventListener('DOMContentLoaded', function() {
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+        var tooltipList = tooltipTriggerList.map(function(tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl);
+        });
+    });
+</script>
+{% endblock %}

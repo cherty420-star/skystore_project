@@ -1,0 +1,174 @@
+{% extends 'catalog/base.html' %}
+{% load static %}
+
+{% block title %}Регистрация - Skystore{% endblock %}
+
+{% block extra_css %}
+<style>
+    .auth-wrapper {
+        max-width: 500px;
+        margin: 3rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    }
+
+    .auth-title {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .auth-title h2 {
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: inline-block;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-control {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 0.75rem;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        padding: 0.75rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        width: 100%;
+        color: white;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .auth-links {
+        text-align: center;
+        margin-top: 1.5rem;
+    }
+
+    .auth-links a {
+        color: #667eea;
+        text-decoration: none;
+    }
+
+    .auth-links a:hover {
+        text-decoration: underline;
+    }
+
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0 0;
+        color: #dc3545;
+        font-size: 0.875rem;
+    }
+
+    .helptext {
+        font-size: 0.875rem;
+        color: #6c757d;
+        margin-top: 0.25rem;
+        display: block;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="auth-wrapper">
+        <div class="auth-title">
+            <h2>
+                <i class="bi bi-person-plus me-2"></i>
+                {{ title }}
+            </h2>
+            <p class="text-muted">Создайте аккаунт для доступа ко всем возможностям</p>
+        </div>
+
+        {% if messages %}
+        <div class="messages mb-4">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+
+            {% for field in form %}
+            <div class="form-group">
+                <label class="form-label" for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                    {% if field.field.required %}
+                        <span class="text-danger">*</span>
+                    {% endif %}
+                </label>
+
+                {{ field }}
+
+                {% if field.help_text %}
+                <div class="helptext">{{ field.help_text }}</div>
+                {% endif %}
+
+                {% if field.errors %}
+                <ul class="errorlist">
+                    {% for error in field.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <button type="submit" class="btn-submit">
+                <i class="bi bi-check-circle me-2"></i>
+                Зарегистрироваться
+            </button>
+        </form>
+
+        <div class="auth-links">
+            <p class="mb-0">
+                Уже есть аккаунт?
+                <a href="{% url 'users:login' %}">Войдите</a>
+            </p>
+        </div>
+    </div>
+</div>
+{% endblock %}
