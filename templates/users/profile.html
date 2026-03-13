@@ -1,0 +1,249 @@
+{% extends 'catalog/base.html' %}
+{% load static %}
+
+{% block title %}Мой профиль - Skystore{% endblock %}
+
+{% block extra_css %}
+<style>
+    .profile-wrapper {
+        max-width: 600px;
+        margin: 3rem auto;
+        padding: 2rem;
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    }
+
+    .profile-title {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .profile-title h2 {
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        display: inline-block;
+    }
+
+    .avatar-preview {
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+
+    .avatar-preview img {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        object-fit: cover;
+        border: 3px solid #667eea;
+        padding: 3px;
+    }
+
+    .avatar-placeholder {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        color: white;
+        font-size: 3rem;
+        font-weight: bold;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        font-weight: 600;
+        color: #495057;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-control {
+        border: 2px solid #e9ecef;
+        border-radius: 10px;
+        padding: 0.75rem;
+        transition: all 0.3s ease;
+        width: 100%;
+    }
+
+    .form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.1);
+        outline: none;
+    }
+
+    .btn-submit {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        padding: 0.75rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        width: 100%;
+        color: white;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-cancel {
+        background: white;
+        border: 2px solid #6c757d;
+        padding: 0.75rem 2rem;
+        font-size: 1.1rem;
+        font-weight: 600;
+        width: 100%;
+        color: #6c757d;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .btn-cancel:hover {
+        background: #6c757d;
+        color: white;
+        text-decoration: none;
+    }
+
+    .errorlist {
+        list-style: none;
+        padding: 0;
+        margin: 0.5rem 0 0;
+        color: #dc3545;
+        font-size: 0.875rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container">
+    <div class="profile-wrapper">
+        <div class="profile-title">
+            <h2>
+                <i class="bi bi-person-circle me-2"></i>
+                {{ title }}
+            </h2>
+        </div>
+
+        {% if messages %}
+        <div class="messages mb-4">
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+
+        <div class="avatar-preview">
+            {% if user.avatar %}
+            <img src="{{ user.avatar.url }}" alt="{{ user.email }}">
+            {% else %}
+            <div class="avatar-placeholder">
+                {{ user.email|first|upper }}
+            </div>
+            {% endif %}
+        </div>
+
+        <form method="post" enctype="multipart/form-data" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div class="alert alert-danger">
+                {{ form.non_field_errors }}
+            </div>
+            {% endif %}
+
+            {% for field in form %}
+            <div class="form-group">
+                <label class="form-label" for="{{ field.id_for_label }}">
+                    {{ field.label }}
+                </label>
+
+                {{ field }}
+
+                {% if field.help_text %}
+                <div class="form-text text-muted small">{{ field.help_text }}</div>
+                {% endif %}
+
+                {% if field.errors %}
+                <ul class="errorlist">
+                    {% for error in field.errors %}
+                    <li>{{ error }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+            </div>
+            {% endfor %}
+
+            <div class="row mt-4">
+                <div class="col-md-6 mb-2">
+                    <a href="{% url 'catalog:home' %}" class="btn-cancel">
+                        <i class="bi bi-x-circle me-2"></i>
+                        Отмена
+                    </a>
+                </div>
+                <div class="col-md-6 mb-2">
+                    <button type="submit" class="btn-submit">
+                        <i class="bi bi-check-circle me-2"></i>
+                        Сохранить изменения
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Предпросмотр аватара при выборе файла
+    document.addEventListener('DOMContentLoaded', function() {
+        const avatarInput = document.getElementById('id_avatar');
+        const avatarPreview = document.querySelector('.avatar-preview img');
+        const avatarPlaceholder = document.querySelector('.avatar-placeholder');
+
+        if (avatarInput) {
+            avatarInput.addEventListener('change', function(event) {
+                const file = event.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        if (avatarPreview) {
+                            avatarPreview.src = e.target.result;
+                        } else if (avatarPlaceholder) {
+                            // Заменяем placeholder на изображение
+                            const newImg = document.createElement('img');
+                            newImg.src = e.target.result;
+                            newImg.style.width = '150px';
+                            newImg.style.height = '150px';
+                            newImg.style.borderRadius = '50%';
+                            newImg.style.objectFit = 'cover';
+                            newImg.style.border = '3px solid #667eea';
+                            newImg.style.padding = '3px';
+                            avatarPlaceholder.replaceWith(newImg);
+                        }
+                    }
+                    reader.readAsDataURL(file);
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}
