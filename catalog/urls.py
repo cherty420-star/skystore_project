@@ -12,4 +12,7 @@ urlpatterns = [
     path('product/create/', views.ProductCreateView.as_view(), name='product_create'),
     path('product/<int:pk>/update/', views.ProductUpdateView.as_view(), name='product_update'),
     path('product/<int:pk>/delete/', views.ProductDeleteView.as_view(), name='product_delete'),
+
+    # Отмена публикации (для модераторов)
+    path('product/<int:pk>/unpublish/', views.ProductUnpublishView.as_view(), name='product_unpublish'),
 ]

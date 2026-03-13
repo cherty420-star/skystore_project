@@ -60,18 +60,21 @@ class ProductForm(forms.ModelForm):
 
     class Meta:
         model = Product
-        fields = ['name', 'description', 'image', 'category', 'price']
+        fields = ['name', 'description', 'image', 'category', 'price', 'is_published']
 
     def __init__(self, *args, **kwargs):
-        """Стилизация формы через __init__"""
+        self.user = kwargs.pop('user', None)  # Получаем пользователя из kwargs
         super().__init__(*args, **kwargs)
 
         # Стилизация всех полей
         for field_name, field in self.fields.items():
-            if isinstance(field.widget, forms.CheckboxInput):
+            if field_name == 'is_published':
                 field.widget.attrs['class'] = 'form-check-input'
+                field.label = 'Опубликовать товар'
             elif isinstance(field.widget, forms.Select):
                 field.widget.attrs['class'] = 'form-select'
+            elif isinstance(field.widget, forms.CheckboxInput):
+                field.widget.attrs['class'] = 'form-check-input'
             else:
                 field.widget.attrs['class'] = 'form-control'
 
@@ -94,6 +97,7 @@ class ProductForm(forms.ModelForm):
         self.fields['image'].label = 'Изображение'
         self.fields['category'].label = 'Категория'
         self.fields['price'].label = 'Цена (₽)'
+        self.fields['category'].empty_label = 'Выберите категорию'
 
     def validate_forbidden_words(self, value, field_name):
         """Общая валидация на запрещенные слова"""
@@ -136,7 +140,7 @@ class ProductForm(forms.ModelForm):
         return price
 
     def clean_image(self):
-        """Валидация изображения (дополнительное задание)"""
+        """Валидация изображения"""
         image = self.cleaned_data.get('image')
 
         if image:
@@ -149,3 +153,17 @@ class ProductForm(forms.ModelForm):
                 raise ValidationError('Поддерживаются только форматы JPEG и PNG')
 
         return image
+
+    def save(self, commit=True):
+        """Сохраняем продукт с привязкой к владельцу"""
+        instance = super().save(commit=False)
+
+        # Если создается новый продукт и есть пользователь
+        if not instance.pk and self.user and not self.user.is_anonymous:
+            instance.owner = self.user
+
+        if commit:
+            instance.save()
+            self.save_m2m()
+
+        return instance
