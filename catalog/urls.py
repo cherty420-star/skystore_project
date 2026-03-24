@@ -15,4 +15,7 @@ urlpatterns = [
 
     # Отмена публикации (для модераторов)
     path('product/<int:pk>/unpublish/', views.ProductUnpublishView.as_view(), name='product_unpublish'),
+
+    # Просмотр продуктов по категориям
+    path('category/<int:category_id>/', views.CategoryProductsView.as_view(), name='category_products'),
 ]

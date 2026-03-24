@@ -5,7 +5,7 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from django.core.mail import send_mail
 from django.conf import settings
-from .forms import UserRegistrationForm, UserLoginForm, UserProfileForm
+from .forms import UserRegistrationForm, UserProfileForm
 from .models import User
 
 
@@ -54,7 +54,6 @@ class UserRegistrationView(CreateView):
 
 class UserLoginView(LoginView):
     """Авторизация пользователя"""
-    form_class = UserLoginForm
     template_name = 'users/login.html'
 
     def get_context_data(self, **kwargs):

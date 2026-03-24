@@ -7,9 +7,7 @@ load_dotenv()
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-z92dcqa$w#7*41-yqj%emiib*#$yyzrbgod@w3&23_phqmi7dm')
-
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
-
 ALLOWED_HOSTS = []
 
 # Application definition
@@ -22,7 +20,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'catalog',
     'blog',
-    'users',  # Добавляем новое приложение
+    'users',
 ]
 
 MIDDLEWARE = [
@@ -103,18 +101,59 @@ MEDIA_ROOT = BASE_DIR / 'media'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Custom user model
-AUTH_USER_MODEL = 'users.User'  # Указываем кастомную модель пользователя
+AUTH_USER_MODEL = 'users.User'
 
-# Email settings (для отправки писем)
-EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # Для разработки - вывод в консоль
-# Для продакшена нужно будет настроить реальный email
-# EMAIL_HOST = 'smtp.gmail.com'
-# EMAIL_PORT = 587
-# EMAIL_USE_TLS = True
-# EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER')
-# EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD')
+# Email settings
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
 
 # Login/Logout redirects
 LOGIN_URL = 'users:login'
 LOGIN_REDIRECT_URL = 'catalog:home'
 LOGOUT_REDIRECT_URL = 'catalog:home'
+
+# ========== НАСТРОЙКИ REDIS ==========
+
+# Включение/выключение кеширования
+CACHE_ENABLED = os.getenv('CACHE_ENABLED', 'True') == 'True'
+
+# Настройки кеширования
+CACHES = {
+    'default': {
+        'BACKEND': 'django_redis.cache.RedisCache',
+        'LOCATION': 'redis://127.0.0.1:6379/1',  # URL Redis (база 1)
+        'OPTIONS': {
+            'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+            'PASSWORD': os.getenv('REDIS_PASSWORD', ''),  # Если есть пароль
+            'SOCKET_CONNECT_TIMEOUT': 5,
+            'SOCKET_TIMEOUT': 5,
+            'RETRY_ON_TIMEOUT': True,
+            'MAX_CONNECTIONS': 1000,
+        },
+        'KEY_PREFIX': 'skystore',  # Префикс для всех ключей кеша
+        'TIMEOUT': 300,  # Время жизни кеша по умолчанию (5 минут)
+    }
+}
+
+# Использование кеша для сессий (опционально)
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'
+SESSION_CACHE_ALIAS = 'default'
+
+# Использование кеша для кеширования страниц
+CACHE_MIDDLEWARE_ALIAS = 'default'
+CACHE_MIDDLEWARE_SECONDS = 300  # 5 минут
+CACHE_MIDDLEWARE_KEY_PREFIX = 'skystore'
+
+# Проверка подключения к Redis
+if CACHE_ENABLED:
+    try:
+        from django.core.cache import cache
+        cache.set('test_key', 'test_value', 10)
+        test_value = cache.get('test_key')
+        if test_value == 'test_value':
+            print("✅ Redis подключен успешно!")
+        else:
+            print("⚠️ Redis не работает, кеширование отключено")
+            CACHE_ENABLED = False
+    except Exception as e:
+        print(f"❌ Ошибка подключения к Redis: {e}")
+        CACHE_ENABLED = False

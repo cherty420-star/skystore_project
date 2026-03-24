@@ -5,40 +5,49 @@ from django.shortcuts import redirect, get_object_or_404
 from django.utils import timezone
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin, UserPassesTestMixin
 from django.core.exceptions import PermissionDenied
-from django.http import HttpResponseForbidden
-from .models import Product, Category, ContactMessage  # ContactMessage должен быть здесь
+from django.views.decorators.cache import cache_page
+from django.utils.decorators import method_decorator
+from django.core.cache import cache
+from django.conf import settings
+from .models import Product, Category, ContactMessage
 from .forms import ContactForm, ProductForm
+from .services import get_products_by_category, get_all_categories_with_counts, clear_category_cache
 
 
 class HomeListView(ListView):
-    """Контроллер для главной страницы (общедоступный)"""
+    """Контроллер для главной страницы"""
     model = Product
     template_name = 'catalog/home.html'
     context_object_name = 'products'
+    paginate_by = 12
 
     def get_queryset(self):
-        # Показываем только опубликованные товары на главной
-        return Product.objects.filter(is_published=True).select_related('category').order_by('-created_at')[:5]
+        # Показываем только опубликованные товары
+        return Product.objects.filter(
+            is_published=True
+        ).select_related('category', 'owner').order_by('-created_at')
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['total_products'] = Product.objects.filter(is_published=True).count()
         context['total_categories'] = Category.objects.count()
+        context['categories'] = get_all_categories_with_counts()  # Используем сервисную функцию
         return context
 
 
+@method_decorator(cache_page(300), name='dispatch')  # Кешируем на 5 минут
 class ProductDetailView(DetailView):
-    """Контроллер для страницы товара (общедоступный)"""
+    """Контроллер для страницы товара (с кешированием)"""
     model = Product
     template_name = 'catalog/product_detail.html'
     context_object_name = 'product'
 
     def get_queryset(self):
-        return Product.objects.select_related('category')
+        return Product.objects.select_related('category', 'owner')
 
     def get_object(self, queryset=None):
         obj = super().get_object(queryset)
-        # Проверяем, опубликован ли товар или пользователь - владелец/модератор
+        # Проверяем, опубликован ли товар
         user = self.request.user
         if not obj.is_published:
             if not (user.is_authenticated and
@@ -48,22 +57,46 @@ class ProductDetailView(DetailView):
         return obj
 
 
+class CategoryProductsView(ListView):
+    """Контроллер для отображения продуктов в категории"""
+    template_name = 'catalog/category_products.html'
+    context_object_name = 'products'
+    paginate_by = 12
+
+    def get_queryset(self):
+        """Получаем продукты из категории с использованием сервисной функции"""
+        self.category_id = self.kwargs.get('category_id')
+        self.category = get_object_or_404(Category, id=self.category_id)
+
+        # Используем сервисную функцию с кешированием
+        return get_products_by_category(self.category_id, use_cache=settings.CACHE_ENABLED)
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['category'] = self.category
+        context['categories'] = get_all_categories_with_counts()
+        return context
+
+
 class ProductCreateView(LoginRequiredMixin, CreateView):
-    """Контроллер для создания продукта (только для авторизованных)"""
+    """Контроллер для создания продукта"""
     model = Product
     form_class = ProductForm
     template_name = 'catalog/product_form.html'
     success_url = reverse_lazy('catalog:home')
 
     def get_form_kwargs(self):
-        """Передаем пользователя в форму"""
         kwargs = super().get_form_kwargs()
         kwargs['user'] = self.request.user
         return kwargs
 
     def form_valid(self, form):
+        response = super().form_valid(form)
+        # Очищаем кеш категорий при создании нового продукта
+        if self.object.category:
+            clear_category_cache(self.object.category.id)
         messages.success(self.request, '✅ Товар успешно создан!')
-        return super().form_valid(form)
+        return response
 
     def form_invalid(self, form):
         messages.error(self.request, '❌ Исправьте ошибки в форме')
@@ -76,37 +109,39 @@ class ProductCreateView(LoginRequiredMixin, CreateView):
 
 
 class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
-    """Контроллер для редактирования продукта (только для владельца или модератора)"""
+    """Контроллер для редактирования продукта"""
     model = Product
     form_class = ProductForm
     template_name = 'catalog/product_form.html'
 
     def test_func(self):
-        """Проверка прав на редактирование"""
         product = self.get_object()
         user = self.request.user
-
-        # Редактировать может владелец или модератор (с правом на отмену публикации)
         return user == product.owner or user.has_perm('catalog.can_unpublish_product')
 
     def handle_no_permission(self):
-        """Обработка отсутствия прав"""
         messages.error(self.request, '❌ У вас нет прав для редактирования этого товара')
         return redirect('catalog:product_detail', pk=self.get_object().pk)
 
     def get_form_kwargs(self):
-        """Передаем пользователя в форму"""
         kwargs = super().get_form_kwargs()
         kwargs['user'] = self.request.user
         return kwargs
 
-    def get_success_url(self):
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        # Очищаем кеш категории при обновлении продукта
+        if self.object.category:
+            clear_category_cache(self.object.category.id)
         messages.success(self.request, '✅ Товар успешно обновлен!')
-        return reverse_lazy('catalog:product_detail', kwargs={'pk': self.object.pk})
+        return response
 
     def form_invalid(self, form):
         messages.error(self.request, '❌ Исправьте ошибки в форме')
         return super().form_invalid(form)
+
+    def get_success_url(self):
+        return reverse_lazy('catalog:product_detail', kwargs={'pk': self.object.pk})
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -115,51 +150,61 @@ class ProductUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
 
 
 class ProductDeleteView(LoginRequiredMixin, UserPassesTestMixin, DeleteView):
-    """Контроллер для удаления продукта (владелец или модератор)"""
+    """Контроллер для удаления продукта"""
     model = Product
     template_name = 'catalog/product_confirm_delete.html'
     success_url = reverse_lazy('catalog:home')
 
     def test_func(self):
-        """Проверка прав на удаление"""
         product = self.get_object()
         user = self.request.user
-
-        # Удалять может владелец или модератор (с правом на удаление любого продукта)
         return user == product.owner or user.has_perm('catalog.can_delete_any_product')
 
     def handle_no_permission(self):
-        """Обработка отсутствия прав"""
         messages.error(self.request, '❌ У вас нет прав для удаления этого товара')
         return redirect('catalog:product_detail', pk=self.get_object().pk)
 
     def delete(self, request, *args, **kwargs):
+        product = self.get_object()
+        category_id = product.category.id if product.category else None
+        response = super().delete(request, *args, **kwargs)
+
+        # Очищаем кеш категории при удалении продукта
+        if category_id:
+            clear_category_cache(category_id)
+
         messages.success(request, '✅ Товар успешно удален!')
-        return super().delete(request, *args, **kwargs)
+        return response
 
 
 class ProductUnpublishView(LoginRequiredMixin, PermissionRequiredMixin, UpdateView):
-    """Контроллер для отмены публикации продукта (только для модераторов)"""
+    """Контроллер для отмены публикации продукта"""
     model = Product
     permission_required = 'catalog.can_unpublish_product'
     template_name = 'catalog/product_unpublish.html'
-    fields = []  # Не обновляем никакие поля, просто меняем статус
-    success_url = reverse_lazy('catalog:home')
+    fields = []
 
     def handle_no_permission(self):
         messages.error(self.request, '❌ У вас нет прав для отмены публикации товара')
         return redirect('catalog:product_detail', pk=self.get_object().pk)
 
     def form_valid(self, form):
-        """Отменяем публикацию продукта"""
         self.object.is_published = False
         self.object.save()
+
+        # Очищаем кеш категории
+        if self.object.category:
+            clear_category_cache(self.object.category.id)
+
         messages.success(self.request, f'✅ Публикация товара "{self.object.name}" отменена')
         return super().form_valid(form)
 
+    def get_success_url(self):
+        return reverse_lazy('catalog:home')
+
 
 class ContactsView(TemplateView):
-    """Контроллер для страницы контактов (общедоступный)"""
+    """Контроллер для страницы контактов"""
     template_name = 'catalog/contacts.html'
 
     def get_context_data(self, **kwargs):
